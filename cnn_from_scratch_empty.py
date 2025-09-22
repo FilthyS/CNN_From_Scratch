@@ -137,8 +137,7 @@ class ReLU(Module):
             A tensor of the same shape as x, where every negative value
             in the input is replaced with 0.
         """
-        # TODO: YOUR CODE HERE
-        pass
+        return F.relu(x)
     
     def bwd(self, out, x):
         """
@@ -156,8 +155,8 @@ class ReLU(Module):
         Sets:
             x.g: The gradient with respect to the input `x`.
         """
-        # TODO: YOUR CODE HERE
-        pass
+        mask = (x > 0).float()
+        x.g = out.g * mask
 
 class Flatten(Module):
     """
