@@ -182,7 +182,8 @@ class Flatten(Module):
           you can reverse this operation in the backward pass.
         """
         # TODO: YOUR CODE HERE
-        pass
+        self.shape = x.shape
+        return x.view(x.size(0), -1)
     
     def bwd(self, out, x):
         """
@@ -200,7 +201,9 @@ class Flatten(Module):
                  the original input shape you saved in the forward pass.
         """
         # TODO: YOUR CODE HERE
-        pass
+        reshaped_grad = out.g.view(self.shape)
+        x.g = reshaped_grad
+
 # ============================================================================
 # FULLY CONNECTED LAYER - YOUR IMPLEMENTATION NEEDED
 # ============================================================================
