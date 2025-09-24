@@ -317,8 +317,32 @@ class Conv2D(Module):
         
         # TODO: YOUR CODE HERE
         # return out_cols.view(N, self.cout, H_out, W_out)
-        pass
-    
+
+        # im2col: unfold input into columns
+        x_unf = F.unfold(x, kernel_size=(self.kH, self.kW), padding=self.padding, stride=self.stride)
+
+        # reshape self.W to 2D
+        self.W.view(self.cout, -1)
+
+        # perform matrix multiplication
+        unbiased_conv_out_2D = self.W.view(self.cout, -1) @ x_unf  # shape (cout, N*L)
+
+        # add bias if not None
+        if self.b is not None:
+            conv_out_2D = unbiased_conv_out_2D + self.b.view(-1, 1)
+        else:
+            conv_out_2D = unbiased_conv_out_2D
+                
+        # calculate output spatial dimensions for the backprop
+        H_out = (H + 2 * self.padding[0] - self.kH) // self.stride[0] + 1
+        W_out = (W + 2 * self.padding[1] - self.kW) // self.stride[1] + 1
+        self.out_spatial = (H_out, W_out)
+
+        # reshape back to 4D
+        conv_out = conv_out_2D.view(N, self.cout, H_out, W_out)
+
+        return conv_out
+
     def bwd(self, out, x):
         """
         TODO: Implement the Conv2D backward pass.
