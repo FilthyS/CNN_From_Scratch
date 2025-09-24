@@ -181,7 +181,6 @@ class Flatten(Module):
         - You MUST save the original shape of `x` (e.g., in `self.shape`) so
           you can reverse this operation in the backward pass.
         """
-        # TODO: YOUR CODE HERE
         self.shape = x.shape
         return x.view(x.size(0), -1)
     
@@ -200,7 +199,6 @@ class Flatten(Module):
             x.g: The gradient with respect to the input `x`, reshaped to match
                  the original input shape you saved in the forward pass.
         """
-        # TODO: YOUR CODE HERE
         reshaped_grad = out.g.view(self.shape)
         x.g = reshaped_grad
 
