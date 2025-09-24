@@ -231,8 +231,7 @@ class Linear(Module):
         Returns:
             An output tensor `y` of shape [N, out_features].
         """
-        # TODO: YOUR CODE HERE
-        pass
+        return x @ self.w + self.b
     
     def bwd(self, out, x):
         """
@@ -250,8 +249,9 @@ class Linear(Module):
             self.w.g (weight gradient): How much did `w` affect the loss? (x.T @ out.g)
             self.b.g (bias gradient): How much did `b` affect the loss? (sum of out.g)
         """
-        # TODO: YOUR CODE HERE
-        pass
+        x.g = out.g @ self.w.t()
+        self.w.g = x.t() @ out.g
+        self.b.g = out.g.sum(0)
 
 # ============================================================================
 # CONVOLUTIONAL LAYER - YOUR IMPLEMENTATION NEEDED
