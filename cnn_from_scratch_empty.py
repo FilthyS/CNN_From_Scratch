@@ -314,9 +314,6 @@ class Conv2D(Module):
         N, C, H, W = x.shape
         assert C == self.cin
         self.in_shape = (N, C, H, W)
-        
-        # TODO: YOUR CODE HERE
-        # return out_cols.view(N, self.cout, H_out, W_out)
 
         # im2col: unfold input into columns
         x_unf = F.unfold(x, kernel_size=(self.kH, self.kW), padding=self.padding, stride=self.stride)
