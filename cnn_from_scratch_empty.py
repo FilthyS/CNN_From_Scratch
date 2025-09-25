@@ -317,6 +317,7 @@ class Conv2D(Module):
 
         # im2col: unfold input into columns
         x_unf = F.unfold(x, kernel_size=(self.kH, self.kW), padding=self.padding, stride=self.stride)
+        self.X_unf = x_unf  # Save for backward pass
 
         # reshape self.W to 2D
         self.W.view(self.cout, -1)
@@ -383,8 +384,33 @@ class Conv2D(Module):
         # to match the unfolded data from the forward pass.
         G = out.g.view(N, self.cout, L)
         
-        # TODO: YOUR CODE HERE
-        pass
+        # bias gradient
+        if self.b is not None:
+            self.b.g = G.sum(dim=(0, 2))  # Sum over N and L dimensions, keep C_out
+
+        # weight gradient: sum over batch of G @ X_unf^T
+        W_grad = torch.zeros_like(self.W)
+        for n in range(N):
+            # G[n]: [C_out, L], X_unf[n]: [C_in*kH*kW, L]
+            grad_n = G[n] @ self.X_unf[n].T  # [C_out, C_in*kH*kW]
+            W_grad += grad_n.view(self.cout, self.cin, self.kH, self.kW)
+        self.W.g = W_grad
+
+        # input gradient: W^T @ G
+        W_reshaped = self.W.view(self.cout, -1)  # [C_out, C_in*kH*kW]
+        X_grad_unf = torch.zeros_like(self.X_unf)
+        for n in range(N):
+            # G[n]: [C_out, L]
+            X_grad_unf[n] = W_reshaped.T @ G[n]  # [C_in*kH*kW, L]
+
+        # Fold back to image shape for each sample in batch
+        x.g = torch.zeros(N, self.cin, H, W, device=self.X_unf.device)
+        for n in range(N):
+            x.g[n] = F.fold(X_grad_unf[n],  # [C_in*kH*kW, L]
+                           output_size=(H, W),
+                           kernel_size=(self.kH, self.kW),
+                           stride=self.stride,
+                           padding=self.padding)
 
 # ============================================================================
 # POOLING LAYER - YOUR IMPLEMENTATION NEEDED
