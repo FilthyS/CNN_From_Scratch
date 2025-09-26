@@ -452,7 +452,31 @@ class MaxPool2D(Module):
         """
         # TODO: YOUR CODE HERE
         # return self.max_vals.view(N, C, H_out, W_out)
-        pass
+        N, C, H, W = x.shape
+
+        # extract patches using unfold
+        x_unf = F.unfold(x, kernel_size=self.k, stride=self.stride)
+        self.X_unf = x_unf  # Save for backward pass
+
+        # reshape to separate batch and channel dimensions
+        # x_unf shape: [N*C, kernel_size^2, num_patches]
+        kernel_size_sq = self.k[0] * self.k[1]
+        num_patches = x_unf.shape[2]
+        x_unf = x_unf.view(N, C, kernel_size_sq, num_patches)
+
+        # find patch max value and index along kernel dimension
+        max_vals, max_idx = x_unf.max(dim=2)
+
+        # save max indices for backward pass
+        self.max_idx = max_idx
+
+        # calculate output spatial dimensions
+        H_out = (H - self.k[0]) // self.stride[0] + 1
+        W_out = (W - self.k[1]) // self.stride[1] + 1
+        self.out_spatial = (H_out, W_out)
+        self.in_shape = (N, C, H, W)
+
+        return max_vals.view(N, C, H_out, W_out)
     
     def bwd(self, out, x):
         """
