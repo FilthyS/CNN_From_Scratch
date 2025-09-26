@@ -450,7 +450,6 @@ class MaxPool2D(Module):
         5.  Calculate the output height and width, and reshape the tensor of
             maximum values into the final output shape [N, C, H_out, W_out].
         """
-        # TODO: YOUR CODE HERE
         # return self.max_vals.view(N, C, H_out, W_out)
         N, C, H, W = x.shape
 
@@ -502,8 +501,31 @@ class MaxPool2D(Module):
             gradient image with the same shape as the original input `x`.
         4.  Set this final gradient image as `x.g`.
         """
-        # TODO: YOUR CODE HERE
-        pass
+
+        # get shapes and parameters
+        N, C, H, W = self.in_shape
+        kernel_size_sq = self.k[0] * self.k[1]
+        num_patches = self.X_unf.shape[2]
+
+        # create a tensor of zeros with the same shape as the unfolded input
+        grad_unf = torch.zeros((N, C, kernel_size_sq, num_patches), device=x.device)
+
+        # scatter gradients to max positions
+        out_grad_flat = out.g.view(N, C, -1)  # shape [N, C, num_patches]
+        for n in range(N):
+            for c in range(C):
+                for patch_idx in range(num_patches):
+                    max_pos = self.max_idx[n, c, patch_idx]
+                    grad_unf[n, c, max_pos, patch_idx] = out_grad_flat[n, c, patch_idx]
+        
+        # fold back to image shape
+        x.g = F.fold(
+            grad_unf.view(N * C, kernel_size_sq, num_patches),
+            output_size=(H, W),
+            kernel_size=self.k,
+            stride=self.stride
+        ).view(N, C, H, W)
+
 
 # ============================================================================
 # LOSS FUNCTION - YOUR IMPLEMENTATION NEEDED
