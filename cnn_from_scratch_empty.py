@@ -561,9 +561,22 @@ class CrossEntropy(Module):
            for each sample. This is the negative log-likelihood.
         5. Return the average of these values across the batch.
         """
-        # TODO: YOUR CODE HERE
-        # return self.out
-        pass
+
+        # safe the targets for backward pass
+        self.targets = targets
+
+        # to prevent numerical errors with large logits
+        # subtract max logit from each sample in the batch
+        logits_stable = logits - logits.max(dim=1, keepdim=True).values
+
+        # compute log-softmax
+        log_softmax = logits_stable - torch.log(torch.exp(logits_stable).sum(dim=1, keepdim=True))
+
+        # compute negative log-likelihood for the correct classes
+        negative_log_likelihood = -log_softmax[torch.arange(logits.size(0)), targets]
+
+        # return the average loss over the batch
+        return negative_log_likelihood.mean()
     
     def bwd(self, out, logits, targets):
         """
@@ -587,8 +600,16 @@ class CrossEntropy(Module):
         3. Since the forward pass returned the *mean* loss, divide the entire
            gradient tensor by the batch size.
         """
-        # TODO: YOUR CODE HERE
-        pass
+
+        # calculate softmax probabilities
+        exp_logits = torch.exp(logits - logits.max(dim=1, keepdim=True).values)
+        softmax = exp_logits / exp_logits.sum(dim=1, keepdim=True)
+
+        # subtract 1 for the correct classes
+        softmax[torch.arange(logits.size(0)), targets] -= 1
+
+        # since we returned mean loss, divide by batch size
+        logits.g = softmax / logits.size(0)
 
 # ============================================================================
 # MODEL CONTAINER - YOUR IMPLEMENTATION NEEDED
