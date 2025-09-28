@@ -320,10 +320,10 @@ class Conv2D(Module):
         self.X_unf = x_unf  # Save for backward pass
 
         # reshape self.W to 2D
-        self.W.view(self.cout, -1)
+        W_2D = self.W.view(self.cout, -1)
 
         # perform matrix multiplication
-        unbiased_conv_out_2D = self.W.view(self.cout, -1) @ x_unf  # shape (cout, N*L)
+        unbiased_conv_out_2D = W_2D @ x_unf  # shape (cout, N*L)
 
         # add bias if not None
         if self.b is not None:
