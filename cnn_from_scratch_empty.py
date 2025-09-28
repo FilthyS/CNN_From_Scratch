@@ -249,8 +249,8 @@ class Linear(Module):
             self.w.g (weight gradient): How much did `w` affect the loss? (x.T @ out.g)
             self.b.g (bias gradient): How much did `b` affect the loss? (sum of out.g)
         """
-        x.g = out.g @ self.w.t()
-        self.w.g = x.t() @ out.g
+        x.g = out.g @ self.w.T
+        self.w.g = x.T @ out.g
         self.b.g = out.g.sum(0)
 
 # ============================================================================
