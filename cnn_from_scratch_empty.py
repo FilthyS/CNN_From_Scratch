@@ -378,9 +378,9 @@ class Conv2D(Module):
         """
         N, C, H, W = self.in_shape
         H_out, W_out = self.out_spatial
-        L = H_out * W_out
+        L = H_out * W_out   # number of conv patches
         
-        # Reshape the incoming output gradient `out.g` into a "column" format
+        # reshape the incoming output gradient `out.g` into a "column" format
         # to match the unfolded data from the forward pass.
         G = out.g.view(N, self.cout, L)
         
@@ -404,7 +404,7 @@ class Conv2D(Module):
             X_grad_unf[n] = W_reshaped.T @ G[n]  # [C_in*kH*kW, L]
 
         # Fold back to image shape for each sample in batch
-        x.g = torch.zeros(N, self.cin, H, W, device=self.X_unf.device)
+        x.g = torch.zeros_like(x)
         for n in range(N):
             x.g[n] = F.fold(X_grad_unf[n],  # [C_in*kH*kW, L]
                            output_size=(H, W),
