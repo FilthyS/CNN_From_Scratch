@@ -701,8 +701,17 @@ def build_cnn():
     Returns:
         A `Sequential` model containing the specified architecture.
     """
-    # TODO: YOUR CODE HERE
-    pass
+    layers = [
+        Conv2D(1, 8, kernel_size=3, stride=1, padding=1),
+        ReLU(),
+        MaxPool2D(kernel_size=2, stride=2),
+        Conv2D(8, 16, kernel_size=3, stride=1, padding=1),
+        ReLU(),
+        MaxPool2D(kernel_size=2, stride=2),
+        Flatten(),
+        Linear(784, 10)
+    ]
+    return Sequential(*layers)
 
 # Create the network and loss function
 # TODO: Uncomment these lines after implementing build_cnn()
