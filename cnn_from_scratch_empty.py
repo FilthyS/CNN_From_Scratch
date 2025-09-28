@@ -635,8 +635,10 @@ class Sequential:
         Returns:
             The final output from the last layer.
         """
-        # TODO: YOUR CODE HERE
-        pass
+        for layer in self.layers:
+            x = layer(x)
+        return x
+        
     
     def backward(self, last_out):
         """
@@ -648,8 +650,8 @@ class Sequential:
         Args:
             last_out: The final output tensor from the forward pass.
         """
-        # TODO: YOUR CODE HERE
-        pass
+        for layer in reversed(self.layers):
+            layer.backward()
 
 # ============================================================================
 # UTILITY FUNCTIONS (PROVIDED)
