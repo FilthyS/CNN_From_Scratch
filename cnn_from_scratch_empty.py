@@ -767,7 +767,7 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
     # TODO: Implement training loop here
     for epoch in range(1, epochs + 1):
         
-        # TODO: Shuffle training indices
+        indices = torch.randperm(X_train.size(0), device=DEVICE)
         
         # Initialize epoch statistics
         ep_loss, ep_correct, ep_total = 0.0, 0, 0
@@ -781,16 +781,51 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
         #     - Backward pass
         #     - Update parameters
         #     - Accumulate statistics
+
+        for i in range(0, X_train.size(0), batch_size):
+            batch_indicies = indices[i:i+batch_size]
+            x_batch = X_train[batch_indicies]
+            y_batch = y_train[batch_indicies]
+
+            # forward pass
+            logits = net(x_batch)
+
+            # compute loss
+            loss = criterion(logits, y_batch)
+
+            # zero gradients
+            for p in params:
+                p.g = zeros_like(p)
+
+            # backward pass
+            loss.g = torch.tensor(1.0, device=DEVICE)
+            criterion.backward()
+            net.backward(logits)
+            sgd_step(params, lr)
+
+            # accumulate statistics
+            ep_loss += loss.item() * x_batch.size(0)
+            ep_correct += (logits.argmax(1) == y_batch).sum().item()
+            ep_total += x_batch.size(0)
         
         # TODO: Compute epoch training metrics
+        train_loss = ep_loss / ep_total
+        train_acc = ep_correct / ep_total
         
         # TODO: Validation (inside a `with torch.no_grad():` block)
         #     - Forward pass on validation set
         #     - Compute validation loss and accuracy
+        with torch.no_grad():
+            val_logits = net(X_val)
+            val_loss = criterion(val_logits, y_val).item()
+            val_acc = accuracy(val_logits, y_val)
 
         # TODO: Store metrics and print results for the epoch
-        
-        pass  # Remove this when you implement the loop
+        train_losses.append(train_loss)
+        train_accs.append(train_acc)
+        val_losses.append(val_loss)
+        val_accs.append(val_acc)
+        print(f"Epoch {epoch}/{epochs}: train_loss={train_loss:.4f} train_acc={train_acc:.4f} val_loss={val_loss:.4f} val_acc={val_acc:.4f}")
     
     return train_losses, val_losses, train_accs, val_accs
 
@@ -802,46 +837,44 @@ if __name__ == "__main__":
     print("CNN from Scratch - Assignment")
     print("=" * 50)
     
-    # TODO: Uncomment and run after implementing all components
+    print("Building CNN...")
+    net = build_cnn()
+    criterion = CrossEntropy()
     
-    # print("Building CNN...")
-    # net = build_cnn()
-    # criterion = CrossEntropy()
+    print("Starting training...")
+    train_losses, val_losses, train_accs, val_accs = train_model(
+        net, criterion, X_train, y_train, X_val, y_val,
+        epochs=5, batch_size=128, lr=0.01
+    )
     
-    # print("Starting training...")
-    # train_losses, val_losses, train_accs, val_accs = train_model(
-    #     net, criterion, X_train, y_train, X_val, y_val,
-    #     epochs=5, batch_size=128, lr=0.01
-    # )
+    # Plot training curves
+    epochs_axis = range(1, len(train_losses) + 1)
+    plt.figure(figsize=(12, 4))
     
-    # # Plot training curves
-    # epochs_axis = range(1, len(train_losses) + 1)
-    # plt.figure(figsize=(12, 4))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_axis, train_losses, label='train')
+    plt.plot(epochs_axis, val_losses, label='val')
+    plt.title('Cross-Entropy Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
     
-    # plt.subplot(1, 2, 1)
-    # plt.plot(epochs_axis, train_losses, label='train')
-    # plt.plot(epochs_axis, val_losses, label='val')
-    # plt.title('Cross-Entropy Loss')
-    # plt.xlabel('Epoch')
-    # plt.ylabel('Loss')
-    # plt.legend()
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_axis, train_accs, label='train')
+    plt.plot(epochs_axis, val_accs, label='val')
+    plt.title('Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
     
-    # plt.subplot(1, 2, 2)
-    # plt.plot(epochs_axis, train_accs, label='train')
-    # plt.plot(epochs_axis, val_accs, label='val')
-    # plt.title('Accuracy')
-    # plt.xlabel('Epoch')
-    # plt.ylabel('Accuracy')
-    # plt.legend()
+    plt.tight_layout()
+    plt.show()
     
-    # plt.tight_layout()
-    # plt.show()
-    
-    # # Final test evaluation
-    # with torch.no_grad():
-    #     test_logits = net(X_test)
-    #     test_loss = criterion(test_logits, y_test).item()
-    #     test_acc = accuracy(test_logits, y_test)
-    # print(f"\nFinal Test Results: loss {test_loss:.4f} | acc {test_acc:.4f}")
+    # Final test evaluation
+    with torch.no_grad():
+        test_logits = net(X_test)
+        test_loss = criterion(test_logits, y_test).item()
+        test_acc = accuracy(test_logits, y_test)
+    print(f"\nFinal Test Results: loss {test_loss:.4f} | acc {test_acc:.4f}")
     
     print("Please implement the TODO sections to complete the assignment!")
