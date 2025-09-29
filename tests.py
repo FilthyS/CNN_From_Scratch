@@ -363,7 +363,7 @@ def test_training_step_decreases_loss():
 # Run all
 # -------------------------
 def run_all_tests():
-    print("Devict:", DEVICE)
+    print("Device:", DEVICE)
     test_linear_forward_backward()
     test_relu_forward_backward()
     test_cross_entropy_logits()
