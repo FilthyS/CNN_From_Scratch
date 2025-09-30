@@ -127,8 +127,6 @@ class ReLU(Module):
     
     def forward(self, x):
         """
-        TODO: Implement the ReLU forward pass.
-        
         This function should apply the ReLU activation element-wise.
         
         Args:
@@ -142,8 +140,6 @@ class ReLU(Module):
     
     def bwd(self, out, x):
         """
-        TODO: Implement the ReLU backward pass.
-        
         This function calculates the gradient for the input `x`. The gradient from
         the next layer (`out.g`) is passed back only for the elements of `x` that
         were positive during the forward pass. Where `x` was zero or negative,
@@ -166,8 +162,6 @@ class Flatten(Module):
     """
     def forward(self, x):
         """
-        TODO: Implement the Flatten forward pass.
-        
         This function reshapes a multi-dimensional tensor into a 2D tensor.
         For example, an input of shape `[N, C, H, W]` becomes `[N, C*H*W]`.
         
@@ -187,8 +181,6 @@ class Flatten(Module):
     
     def bwd(self, out, x):
         """
-        TODO: Implement the Flatten backward pass.
-        
         This function reshapes the incoming gradient `out.g` back to the original
         shape of the input `x`.
         
@@ -222,8 +214,6 @@ class Linear(Module):
     
     def forward(self, x):
         """
-        TODO: Implement the Linear forward pass.
-        
         This function performs the linear operation `y = x @ W + b`.
         
         Args:
@@ -236,8 +226,6 @@ class Linear(Module):
     
     def bwd(self, out, x):
         """
-        TODO: Implement the Linear backward pass.
-        
         This function calculates the gradients for the input, weights, and bias
         using the chain rule.
         
@@ -289,8 +277,6 @@ class Conv2D(Module):
     
     def forward(self, x):
         """
-        TODO: Implement the Conv2D forward pass using the `im2col` technique.
-
         Args:
             x: Input tensor of shape [N, C_in, H, W].
 
@@ -344,8 +330,6 @@ class Conv2D(Module):
 
     def bwd(self, out, x):
         """
-        TODO: Implement the Conv2D backward pass.
-
         This function calculates gradients for the input `x`, weights `self.W`,
         and bias `self.b` by reversing the `im2col` process.
 
@@ -389,6 +373,8 @@ class Conv2D(Module):
         if self.b is not None:
             self.b.g = G.sum(dim=(0, 2))  # Sum over N and L dimensions, keep C_out
 
+        # TODO need vectorized version of weight gradient calculation
+
         # weight gradient: sum over batch of G @ X_unf^T
         W_grad = torch.zeros_like(self.W)
         for n in range(N):
@@ -430,8 +416,6 @@ class MaxPool2D(Module):
     
     def forward(self, x):
         """
-        TODO: Implement the forward pass for Max Pooling.
-
         This function shrinks the input by taking the maximum value over a sliding window.
 
         Args:
@@ -480,8 +464,6 @@ class MaxPool2D(Module):
     
     def bwd(self, out, x):
         """
-        TODO: Implement the backward pass for Max Pooling.
-
         The main idea is that the gradient only flows back to the input neuron
         that had the maximum value. All other neurons in the window get zero gradient.
 
@@ -519,6 +501,8 @@ class MaxPool2D(Module):
                     max_pos = self.max_idx[n, c, patch_idx]
                     grad_unf[n, c, max_pos, patch_idx] = out_grad_flat[n, c, patch_idx]
         
+        # TODO vectorized version to scatter gradients to max positions
+        
         # fold back to image shape
         x.g = F.fold(
             grad_unf.view(N * C, kernel_size_sq, num_patches),
@@ -541,8 +525,6 @@ class CrossEntropy(Module):
     
     def forward(self, logits, targets):
         """
-        TODO: Implement the CrossEntropy forward pass.
-        
         This calculates the cross-entropy loss, which is standard for classification.
         It combines Log-Softmax and Negative Log-Likelihood.
         
@@ -581,8 +563,6 @@ class CrossEntropy(Module):
     
     def bwd(self, out, logits, targets):
         """
-        TODO: Implement the CrossEntropy backward pass.
-        
         This calculates the gradient of the loss with respect to the `logits`.
         The formula is surprisingly simple: `gradient = (softmax(logits) - one_hot_encoding_of_targets)`.
         
@@ -627,8 +607,6 @@ class Sequential:
     
     def __call__(self, x):
         """
-        TODO: Implement the forward pass through all layers.
-        
         This should pass the input `x` through each layer in sequence. The output
         of one layer becomes the input to the next. Try to write this in a generalized manner (Think about iterating through the layers using a loop)
         Args:
@@ -643,8 +621,6 @@ class Sequential:
     
     def backward(self, last_out):
         """
-        TODO: Implement the backward pass through all layers.
-        
         This performs the backward pass through all layers in *reverse* order.
         It starts with the gradient from the loss function (which is stored in
         `last_out.g`) and propagates it backward from the last layer to the first.
@@ -684,8 +660,6 @@ def accuracy(logits, y):
 # ============================================================================
 def build_cnn():
     """
-    TODO: Build the CNN architecture.
-    
     Construct the neural network by creating an instance of each required layer
     and passing them to the `Sequential` container in the correct order.
     
@@ -724,8 +698,6 @@ def build_cnn():
 # ============================================================================
 def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_size=128, lr=0.01):
     """
-    TODO: Implement the complete training and validation loop for the network.
-    
     Args:
         net: The neural network model.
         criterion: The loss function.
@@ -782,7 +754,7 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
         ep_loss, ep_correct, ep_total = 0.0, 0, 0
         print(f"Initialized epoch statistics: loss={ep_loss}, correct={ep_correct}, total={ep_total}")
         
-        # TODO: Mini-batch training loop
+        # Mini-batch training loop
         # for i in range(0, X_train.size(0), batch_size):
         #     - Get batch indices and data
         #     - Forward pass
@@ -848,11 +820,11 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
         avg_batch_time = sum(batch_times) / len(batch_times) if batch_times else 0
         print(f"  Average batch time: {avg_batch_time:.3f}s")
         
-        # TODO: Compute epoch training metrics
+        # Compute epoch training metrics
         train_loss = ep_loss / ep_total
         train_acc = ep_correct / ep_total
         
-        # TODO: Validation (inside a `with torch.no_grad():` block)
+        # Validation (inside a `with torch.no_grad():` block)
         #     - Forward pass on validation set
         #     - Compute validation loss and accuracy
         print("  Starting validation...")
@@ -864,7 +836,7 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
         val_time = time.time() - val_start_time
         print(f"  Validation completed in {val_time:.3f}s")
 
-        # TODO: Store metrics and print results for the epoch
+        # Store metrics and print results for the epoch
         train_losses.append(train_loss)
         train_accs.append(train_acc)
         val_losses.append(val_loss)
