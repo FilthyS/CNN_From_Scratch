@@ -376,28 +376,52 @@ class Conv2D(Module):
         # TODO need vectorized version of weight gradient calculation
 
         # weight gradient: sum over batch of G @ X_unf^T
-        W_grad = torch.zeros_like(self.W)
-        for n in range(N):
-            # G[n]: [C_out, L], X_unf[n]: [C_in*kH*kW, L]
-            grad_n = G[n] @ self.X_unf[n].T  # [C_out, C_in*kH*kW]
-            W_grad += grad_n.view(self.cout, self.cin, self.kH, self.kW)
-        self.W.g = W_grad
+        # W_grad = torch.zeros_like(self.W)
+        # for n in range(N):
+        #     # G[n]: [C_out, L], X_unf[n]: [C_in*kH*kW, L]
+        #     grad_n = G[n] @ self.X_unf[n].T  # [C_out, C_in*kH*kW]
+        #     W_grad += grad_n.view(self.cout, self.cin, self.kH, self.kW)
+        # self.W.g = W_grad
+
+        # G shape: [N, C_out, L]
+        # X_unf shape: [N, C_in*kH*kW, L]
+        # X_unf_T shape: [N, L, C_in*kH*kW]
+        # all_grads shape: [N, C_out, C_in*kH*kW]
+        # self.W.g shape: [C_out, C_in, kH, kW]
+        X_unf_T = self.X_unf.transpose(1, 2)  # [N, L, C_in*kH*kW]
+        all_grads = torch.bmm(G, X_unf_T) # [N, C_out, C_in*kH*kW]
+        summed_grads = all_grads.sum(dim=0)  # [C_out, C_in*kH*kW]
+        self.W.g = summed_grads.view(self.cout, self.cin, self.kH, self.kW)
 
         # input gradient: W^T @ G
+        # W_reshaped = self.W.view(self.cout, -1)  # [C_out, C_in*kH*kW]
+        # X_grad_unf = torch.zeros_like(self.X_unf)
+        # for n in range(N):
+        #     # G[n]: [C_out, L]
+        #     X_grad_unf[n] = W_reshaped.T @ G[n]  # [C_in*kH*kW, L]
+        
+        # W_reshaped shape: [C_out, C_in*kH*kW]
+        # W_reshaped.T shape: [C_in*kH*kW, C_out]
+        # G shape: [N, C_out, L]
+        # X_grad_unf shape: [N, C_in*kH*kW, L]
         W_reshaped = self.W.view(self.cout, -1)  # [C_out, C_in*kH*kW]
-        X_grad_unf = torch.zeros_like(self.X_unf)
-        for n in range(N):
-            # G[n]: [C_out, L]
-            X_grad_unf[n] = W_reshaped.T @ G[n]  # [C_in*kH*kW, L]
+        x_grad_unf = torch.einsum('kc,ncl->nkl', W_reshaped.T, G)  # [N, C_in*kH*kW, L]
+        x.g = F.fold(
+            x_grad_unf,  # [N, C_in*kH*kW, L]
+            output_size=(H, W),
+            kernel_size=(self.kH, self.kW),
+            stride=self.stride,
+            padding=self.padding
+        )
 
         # Fold back to image shape for each sample in batch
-        x.g = torch.zeros_like(x)
-        for n in range(N):
-            x.g[n] = F.fold(X_grad_unf[n],  # [C_in*kH*kW, L]
-                           output_size=(H, W),
-                           kernel_size=(self.kH, self.kW),
-                           stride=self.stride,
-                           padding=self.padding)
+        # x.g = torch.zeros_like(x)
+        # for n in range(N):
+        #     x.g[n] = F.fold(X_grad_unf[n],  # [C_in*kH*kW, L]
+        #                    output_size=(H, W),
+        #                    kernel_size=(self.kH, self.kW),
+        #                    stride=self.stride,
+        #                    padding=self.padding)
 
 # ============================================================================
 # POOLING LAYER - YOUR IMPLEMENTATION NEEDED
