@@ -31,7 +31,6 @@ import torch.nn.functional as F
 import math
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
-import time
 # Set device and random seed for reproducibility
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 torch.manual_seed(42)
@@ -373,8 +372,6 @@ class Conv2D(Module):
         if self.b is not None:
             self.b.g = G.sum(dim=(0, 2))  # Sum over N and L dimensions, keep C_out
 
-        # TODO need vectorized version of weight gradient calculation
-
         # weight gradient: sum over batch of G @ X_unf^T
         # W_grad = torch.zeros_like(self.W)
         # for n in range(N):
@@ -521,13 +518,22 @@ class MaxPool2D(Module):
 
         # scatter gradients to max positions
         out_grad_flat = out.g.view(N, C, -1)  # shape [N, C, num_patches]
-        for n in range(N):
-            for c in range(C):
-                for patch_idx in range(num_patches):
-                    max_pos = self.max_idx[n, c, patch_idx]
-                    grad_unf[n, c, max_pos, patch_idx] = out_grad_flat[n, c, patch_idx]
+
+        # for n in range(N):
+        #     for c in range(C):
+        #         for patch_idx in range(num_patches):
+        #             max_pos = self.max_idx[n, c, patch_idx]
+        #             grad_unf[n, c, max_pos, patch_idx] = out_grad_flat[n, c, patch_idx]
         
-        # TODO vectorized version to scatter gradients to max positions
+        # meshgrid implementation for vectorized scatter
+        n_idx, c_idx, patch_idx = torch.meshgrid(
+            torch.arange(N, device=x.device),
+            torch.arange(C, device=x.device),
+            torch.arange(num_patches, device=x.device),
+            indexing='ij'
+        )
+
+        grad_unf[n_idx, c_idx, self.max_idx, patch_idx] = out_grad_flat
         
         # fold back to image shape
         x.g = F.fold(
@@ -768,17 +774,13 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
     train_losses, val_losses = [], []
     train_accs, val_accs = [], []
     
-    # TODO: Implement training loop here
     for epoch in range(1, epochs + 1):
-        epoch_start_time = time.time()
         print(f"\n=== Starting Epoch {epoch}/{epochs} ===")
-        print(f"Shuffling {X_train.size(0)} training samples...")
 
         indices = torch.randperm(X_train.size(0), device=DEVICE)
 
         # Initialize epoch statistics
         ep_loss, ep_correct, ep_total = 0.0, 0, 0
-        print(f"Initialized epoch statistics: loss={ep_loss}, correct={ep_correct}, total={ep_total}")
         
         # Mini-batch training loop
         # for i in range(0, X_train.size(0), batch_size):
@@ -790,62 +792,32 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
         #     - Update parameters
         #     - Accumulate statistics
 
-        num_batches = (X_train.size(0) + batch_size - 1) // batch_size
-
-        batch_times = []
-        for batch_idx, i in enumerate(range(0, X_train.size(0), batch_size)):
-            batch_start_time = time.time()
-
-            if batch_idx % 50 == 0:  # Print every 50 batches
-                print(f"  Batch {batch_idx+1}/{num_batches} (samples {i}-{min(i+batch_size-1, X_train.size(0)-1)})")
-
+        for i in range(0, X_train.size(0), batch_size):
             batch_indicies = indices[i:i+batch_size]
             x_batch = X_train[batch_indicies]
             y_batch = y_train[batch_indicies]
 
             # forward pass
-            forward_start = time.time()
             logits = net(x_batch)
-            forward_time = time.time() - forward_start
 
             # compute loss
-            loss_start = time.time()
             loss = criterion(logits, y_batch)
-            loss_time = time.time() - loss_start
 
             # zero gradients
-            zero_grad_start = time.time()
             for p in params:
                 p.g = zeros_like(p)
-            zero_grad_time = time.time() - zero_grad_start
 
             # backward pass
-            backward_start = time.time()
             loss.g = torch.tensor(1.0, device=DEVICE)
             criterion.backward()
             net.backward(logits)
             sgd_step(params, lr)
-            backward_time = time.time() - backward_start
 
             # accumulate statistics
             ep_loss += loss.item() * x_batch.size(0)
             ep_correct += (logits.argmax(1) == y_batch).sum().item()
             ep_total += x_batch.size(0)
 
-            batch_time = time.time() - batch_start_time
-            batch_times.append(batch_time)
-
-            # Print detailed timing for first few batches of first epoch
-            if epoch == 1 and batch_idx < 5:
-                current_acc = ep_correct / ep_total if ep_total > 0 else 0
-                print(f"    Batch {batch_idx+1} completed: loss={loss.item():.4f}, acc={current_acc:.4f}")
-                print(f"      Timing: total={batch_time:.3f}s, forward={forward_time:.3f}s, loss={loss_time:.3f}s, zero_grad={zero_grad_time:.3f}s, backward={backward_time:.3f}s")
-                if torch.cuda.is_available():
-                    print(f"      GPU memory: {torch.cuda.memory_allocated() / 1024**2:.1f} MB allocated, {torch.cuda.memory_reserved() / 1024**2:.1f} MB reserved")
-
-        avg_batch_time = sum(batch_times) / len(batch_times) if batch_times else 0
-        print(f"  Average batch time: {avg_batch_time:.3f}s")
-        
         # Compute epoch training metrics
         train_loss = ep_loss / ep_total
         train_acc = ep_correct / ep_total
@@ -853,14 +825,10 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
         # Validation (inside a `with torch.no_grad():` block)
         #     - Forward pass on validation set
         #     - Compute validation loss and accuracy
-        print("  Starting validation...")
-        val_start_time = time.time()
         with torch.no_grad():
             val_logits = net(X_val)
             val_loss = criterion(val_logits, y_val).item()
             val_acc = accuracy(val_logits, y_val)
-        val_time = time.time() - val_start_time
-        print(f"  Validation completed in {val_time:.3f}s")
 
         # Store metrics and print results for the epoch
         train_losses.append(train_loss)
@@ -868,20 +836,8 @@ def train_model(net, criterion, X_train, y_train, X_val, y_val, epochs=5, batch_
         val_losses.append(val_loss)
         val_accs.append(val_acc)
 
-        epoch_time = time.time() - epoch_start_time
         print(f"Epoch {epoch}/{epochs}: train_loss={train_loss:.4f} train_acc={train_acc:.4f} val_loss={val_loss:.4f} val_acc={val_acc:.4f}")
-        print(f"  Epoch completed in {epoch_time:.2f}s (avg batch: {avg_batch_time:.3f}s, validation: {val_time:.3f}s)")
 
-        # GPU memory info at end of epoch
-        if torch.cuda.is_available():
-            print(f"  GPU memory at epoch end: {torch.cuda.memory_allocated() / 1024**2:.1f} MB allocated, {torch.cuda.memory_reserved() / 1024**2:.1f} MB reserved")
-
-        # Estimate remaining time
-        if epoch < epochs:
-            remaining_epochs = epochs - epoch
-            estimated_remaining_time = remaining_epochs * epoch_time
-            print(f"  Estimated remaining time: {estimated_remaining_time/60:.1f} minutes")
-    
     return train_losses, val_losses, train_accs, val_accs
 
 # ============================================================================
@@ -903,33 +859,35 @@ if __name__ == "__main__":
     )
     
     # Plot training curves
-    # epochs_axis = range(1, len(train_losses) + 1)
-    # plt.figure(figsize=(12, 4))
+    epochs_axis = range(1, len(train_losses) + 1)
+    plt.figure(figsize=(12, 4))
     
-    # plt.subplot(1, 2, 1)
-    # plt.plot(epochs_axis, train_losses, label='train')
-    # plt.plot(epochs_axis, val_losses, label='val')
-    # plt.title('Cross-Entropy Loss')
-    # plt.xlabel('Epoch')
-    # plt.ylabel('Loss')
-    # plt.legend()
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_axis, train_losses, label='train')
+    plt.plot(epochs_axis, val_losses, label='val')
+    plt.title('Cross-Entropy Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
     
-    # plt.subplot(1, 2, 2)
-    # plt.plot(epochs_axis, train_accs, label='train')
-    # plt.plot(epochs_axis, val_accs, label='val')
-    # plt.title('Accuracy')
-    # plt.xlabel('Epoch')
-    # plt.ylabel('Accuracy')
-    # plt.legend()
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_axis, train_accs, label='train')
+    plt.plot(epochs_axis, val_accs, label='val')
+    plt.title('Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
     
-    # plt.tight_layout()
-    # plt.show()
-    
+    plt.tight_layout()
+
+    # saves the figure
+    plt.savefig('training_curves.png', dpi=150, bbox_inches='tight')
+    print("\nTraining curves saved to training_curves.png")
+    plt.show()
+
     # Final test evaluation
     with torch.no_grad():
         test_logits = net(X_test)
         test_loss = criterion(test_logits, y_test).item()
         test_acc = accuracy(test_logits, y_test)
     print(f"\nFinal Test Results: loss {test_loss:.4f} | acc {test_acc:.4f}")
-    
-    print("Please implement the TODO sections to complete the assignment!")
