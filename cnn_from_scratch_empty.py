@@ -406,6 +406,8 @@ class Conv2D(Module):
         # X_grad_unf shape: [N, C_in*kH*kW, L]
         W_reshaped = self.W.view(self.cout, -1)  # [C_out, C_in*kH*kW]
         x_grad_unf = torch.einsum('kc,ncl->nkl', W_reshaped.T, G)  # [N, C_in*kH*kW, L]
+        
+        # fold back to shape: [N, C_in, H, W]
         x.g = F.fold(
             x_grad_unf,  # [N, C_in*kH*kW, L]
             output_size=(H, W),
