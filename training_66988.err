@@ -1,0 +1,18 @@
+From github.com:FilthyS/CNN_From_Scratch
+   043f150..bf9a6e5  main       -> origin/main
+/scratch/cx2275/miniforge3/envs/ml_env/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/scratch/cx2275/miniforge3/envs/ml_env/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet18_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet18_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Traceback (most recent call last):
+  File "/scratch/cx2275/CNN_From_Scratch/resnet18.py", line 794, in <module>
+    main()
+  File "/scratch/cx2275/CNN_From_Scratch/resnet18.py", line 668, in main
+    model1.load_state_dict(torch.load(os.path.join(regime1_output_dir, 'best_model.pth')))
+  File "/scratch/cx2275/miniforge3/envs/ml_env/lib/python3.10/site-packages/torch/serialization.py", line 1425, in load
+    with _open_file_like(f, "rb") as opened_file:
+  File "/scratch/cx2275/miniforge3/envs/ml_env/lib/python3.10/site-packages/torch/serialization.py", line 751, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/scratch/cx2275/miniforge3/envs/ml_env/lib/python3.10/site-packages/torch/serialization.py", line 732, in __init__
+    super().__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: './output_20251006_144257/regime1_linear_probe/best_model.pth'

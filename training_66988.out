@@ -1,0 +1,157 @@
+Job ID: 66988
+Job Name: resnet_training
+Node: b-31-12
+GPU: 0
+Start Time: Mon Oct  6 02:40:35 PM EDT 2025
+Working Directory: /scratch/cx2275/CNN_From_Scratch
+Starting Singularity container...
+Updating 043f150..bf9a6e5
+Fast-forward
+ .gitignore                                         |   1 +
+ cnn_from_scratch_empty.py                          |   9 +-
+ .../confusion_matrix.png                           | Bin
+ .../resnet_training_66800.err                      |   0
+ .../resnet_training_66800.out                      |   0
+ .../results_summary.txt                            |   0
+ .../training_curves.png                            | Bin
+ resnet18-test.ipynb                                | 149 +++++-
+ resnet18.py                                        | 510 ++++++++++++++++-----
+ resnet_training_66792.err                          |   4 -
+ resnet_training_66792.out                          |  16 -
+ run_cnn.sbatch                                     |   1 +
+ run_resnet.sbatch                                  |   5 +
+ 13 files changed, 533 insertions(+), 162 deletions(-)
+ rename confusion_matrix.png => linear probe results/confusion_matrix.png (100%)
+ rename resnet_training_66800.err => linear probe results/resnet_training_66800.err (100%)
+ rename resnet_training_66800.out => linear probe results/resnet_training_66800.out (100%)
+ rename results_summary.txt => linear probe results/results_summary.txt (100%)
+ rename training_curves.png => linear probe results/training_curves.png (100%)
+ delete mode 100644 resnet_training_66792.err
+ delete mode 100644 resnet_training_66792.out
+Python version: Python 3.10.18
+PyTorch version: 2.6.0
+CUDA available: True
+GPU count: 1
+GPU name: NVIDIA L4
+==========================
+Running tests...
+Device: cuda
+Training set: torch.Size([48000, 1, 28, 28]), torch.Size([48000])
+Validation set: torch.Size([12000, 1, 28, 28]), torch.Size([12000])
+Test set: torch.Size([10000, 1, 28, 28]), torch.Size([10000])
+Device: cuda
+
+[Linear] forward/backward numeric grad...
+  max |dL/dx (num - analytic)|: 6.458163261413574e-05
+  max |dL/dW (num - analytic)|: 5.84721565246582e-05
+  max |dL/db (num - analytic)|: 0.00011307001113891602
+  PASS
+
+[ReLU] forward/backward numeric grad...
+  max |dL/dx| diff: 0.00018703937530517578
+  PASS
+
+[CrossEntropy] forward/backward numeric grad wrt logits...
+  max |dL/dlogits| diff: 0.00014224275946617126
+  PASS
+
+[Conv2D] forward shape check...
+  PASS
+
+[Conv2D] backward numeric grads (sampled)...
+  max |dL/dx| diff: 0.0005117803812026978
+  max |dL/dW| diff: 0.0006861686706542969
+  PASS
+
+[MaxPool2D] forward vs F.max_pool2d...
+  max |y - y_ref|: 0.0
+  PASS
+
+[MaxPool2D] backward numeric grads...
+  max |dL/dx| diff: 4.225969314575195e-05
+  PASS
+
+[E2E] small CNN forward shape...
+  PASS
+
+[E2E] tiny training sanity: loss should drop...
+  epoch1: loss=2.2131, acc=0.039
+  epoch2: loss=1.9477, acc=0.266
+  PASS
+
+ALL TESTS PASSED (within numeric tolerances)
+==========================
+Tests completed. Starting CNN training...
+Device: cuda
+Training set: torch.Size([48000, 1, 28, 28]), torch.Size([48000])
+Validation set: torch.Size([12000, 1, 28, 28]), torch.Size([12000])
+Test set: torch.Size([10000, 1, 28, 28]), torch.Size([10000])
+CNN from Scratch - Assignment
+==================================================
+Building CNN...
+Starting training...
+Total parameters: 9098
+GPU memory allocated: 210.6 MB
+GPU memory reserved: 212.0 MB
+
+=== Starting Epoch 1/5 ===
+Epoch 1/5: train_loss=1.9249 train_acc=0.4271 val_loss=1.3378 val_acc=0.6769
+
+=== Starting Epoch 2/5 ===
+Epoch 2/5: train_loss=0.8459 train_acc=0.7806 val_loss=0.5704 val_acc=0.8421
+
+=== Starting Epoch 3/5 ===
+Epoch 3/5: train_loss=0.4740 train_acc=0.8664 val_loss=0.4213 val_acc=0.8795
+
+=== Starting Epoch 4/5 ===
+Epoch 4/5: train_loss=0.3759 train_acc=0.8911 val_loss=0.3640 val_acc=0.8921
+
+=== Starting Epoch 5/5 ===
+Epoch 5/5: train_loss=0.3278 train_acc=0.9045 val_loss=0.3222 val_acc=0.9076
+
+Training curves saved to training_curves_20251006_144240.png
+
+Final Test Results: loss 0.2916 | acc 0.9173
+CNN Training completed at:  Mon Oct 6 14:42:42 EDT 2025
+\n==========================
+Starting ResNet-18 fine-tuning on EMNIST...
+Device: cuda
+GPU: NVIDIA L4
+Image size: torch.Size([3, 224, 224])
+Dataset length: 697932
+Training dataset size: 628138
+Validation dataset size: 69794
+Test dataset size: 116323
+Batch size: 128
+Output directory: ./output_20251006_144257
+
+======================================================================
+REGIME 1: LINEAR PROBE (Freeze backbone, train only FC)
+======================================================================
+Frozen backbone. Trainable params: 0.03M
+
+======================================================================
+Training Regime: Regime 1: Linear Probe
+Mixed Precision (AMP): Enabled
+Early Stopping: Enabled (patience=5)
+======================================================================
+Epoch [1/15] LR: 0.010000 | Train Loss: 0.8154, Train Acc: 76.11% | Val Loss: 0.6665, Val Acc: 78.93%
+Epoch [2/15] LR: 0.010000 | Train Loss: 0.6547, Train Acc: 79.39% | Val Loss: 0.6519, Val Acc: 78.73%
+Epoch [3/15] LR: 0.010000 | Train Loss: 0.6328, Train Acc: 79.93% | Val Loss: 0.6228, Val Acc: 79.99%
+Epoch [4/15] LR: 0.010000 | Train Loss: 0.6240, Train Acc: 80.14% | Val Loss: 0.6416, Val Acc: 78.90%
+Epoch [5/15] LR: 0.001000 | Train Loss: 0.6191, Train Acc: 80.25% | Val Loss: 0.6134, Val Acc: 80.27%
+Epoch [6/15] LR: 0.001000 | Train Loss: 0.5857, Train Acc: 81.47% | Val Loss: 0.5949, Val Acc: 81.14%
+Epoch [7/15] LR: 0.001000 | Train Loss: 0.5845, Train Acc: 81.57% | Val Loss: 0.5964, Val Acc: 81.09%
+Epoch [8/15] LR: 0.001000 | Train Loss: 0.5843, Train Acc: 81.57% | Val Loss: 0.5950, Val Acc: 81.05%
+Epoch [9/15] LR: 0.001000 | Train Loss: 0.5842, Train Acc: 81.62% | Val Loss: 0.5967, Val Acc: 81.08%
+Epoch [10/15] LR: 0.000100 | Train Loss: 0.5841, Train Acc: 81.60% | Val Loss: 0.5954, Val Acc: 81.11%
+Epoch [11/15] LR: 0.000100 | Train Loss: 0.5809, Train Acc: 81.72% | Val Loss: 0.5932, Val Acc: 81.21%
+Epoch [12/15] LR: 0.000100 | Train Loss: 0.5809, Train Acc: 81.74% | Val Loss: 0.5915, Val Acc: 81.26%
+Epoch [13/15] LR: 0.000100 | Train Loss: 0.5806, Train Acc: 81.76% | Val Loss: 0.5923, Val Acc: 81.23%
+Epoch [14/15] LR: 0.000100 | Train Loss: 0.5805, Train Acc: 81.74% | Val Loss: 0.5935, Val Acc: 81.25%
+Epoch [15/15] LR: 0.000010 | Train Loss: 0.5808, Train Acc: 81.75% | Val Loss: 0.5921, Val Acc: 81.26%
+
+Training completed in 91.57 minutes
+Epochs trained: 15/15
+Best validation accuracy: 81.26%
+ResNet Training completed at:  Mon Oct 6 16:14:33 EDT 2025
