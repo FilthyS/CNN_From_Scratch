@@ -16,6 +16,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import time
 import random
 import os
+from datetime import datetime
 
 
 # ============================================================================
@@ -301,7 +302,9 @@ def train_regime(model, train_loader, val_loader, criterion, optimizer, schedule
         print(f"Learning Rate Warmup: {warmup_epochs} epochs")
     print(f"{'='*70}")
 
-    # Create output directory for this regime
+    # Create output directory for this regime with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    output_dir = f"{output_dir}_{timestamp}"
     os.makedirs(output_dir, exist_ok=True)
 
     history = {
@@ -623,9 +626,11 @@ def main():
     )
     print(f"Batch size: {batch_size}")
 
-    # Create main output directory
-    main_output_dir = './output'
+    # Create main output directory with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    main_output_dir = f'./output_{timestamp}'
     os.makedirs(main_output_dir, exist_ok=True)
+    print(f"Output directory: {main_output_dir}")
 
     # ========================================================================
     # REGIME 1: LINEAR PROBE (ONLY FC LAYER)

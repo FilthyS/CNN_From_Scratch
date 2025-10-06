@@ -31,6 +31,7 @@ import torch.nn.functional as F
 import math
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
+from datetime import datetime
 # Set device and random seed for reproducibility
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 torch.manual_seed(42)
@@ -880,9 +881,11 @@ if __name__ == "__main__":
     
     plt.tight_layout()
 
-    # saves the figure
-    plt.savefig('training_curves.png', dpi=150, bbox_inches='tight')
-    print("\nTraining curves saved to training_curves.png")
+    # saves the figure with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    output_filename = f'training_curves_{timestamp}.png'
+    plt.savefig(output_filename, dpi=150, bbox_inches='tight')
+    print(f"\nTraining curves saved to {output_filename}")
     plt.show()
 
     # Final test evaluation
