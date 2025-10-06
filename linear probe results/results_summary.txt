@@ -1,0 +1,13 @@
+TASK 2: ResNet-18 EMNIST Fine-Tuning Results
+======================================================================
+
+Test Accuracy: 87.15%
+Test Precision (macro): 0.7980
+Test Recall (macro): 0.7508
+Test F1-Score (macro): 0.7571
+
+Efficiency Accounting:
+Regime 1 (Linear Probe): 0.03M params, 61.20 min
+Regime 2 (Partial Unfreeze): 8.43M params, 92.96 min
+Total time: 154.16 minutes
+Device: cuda
