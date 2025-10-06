@@ -1,0 +1,101 @@
+Job ID: 66800
+Job Name: resnet_training
+Node: b-31-1
+GPU: 0
+Start Time: Sun Oct  5 08:45:13 PM EDT 2025
+Working Directory: /scratch/cx2275/CNN_From_Scratch
+Starting Singularity container...
+Python version: Python 3.10.18
+PyTorch version: 2.6.0
+CUDA available: True
+GPU count: 1
+GPU name: NVIDIA L4
+==========================
+Starting ResNet-18 fine-tuning on EMNIST...
+Device: cuda
+GPU: NVIDIA L4
+Image size: torch.Size([3, 224, 224])
+Dataset length: 697932
+Training dataset size: 628138
+Validation dataset size: 69794
+Test dataset size: 116323
+
+======================================================================
+REGIME 1: LINEAR PROBE
+======================================================================
+Frozen backbone. Trainable params: 0.03M
+
+======================================================================
+Training Regime: linear_probe
+Mixed Precision (AMP): Enabled
+======================================================================
+Epoch [1/10] Train Loss: 0.9039, Train Acc: 74.88% | Val Loss: 0.7021, Val Acc: 78.96%
+Epoch [2/10] Train Loss: 0.6739, Train Acc: 79.33% | Val Loss: 0.6636, Val Acc: 79.24%
+Epoch [3/10] Train Loss: 0.6394, Train Acc: 80.12% | Val Loss: 0.6425, Val Acc: 79.46%
+Epoch [4/10] Train Loss: 0.6236, Train Acc: 80.46% | Val Loss: 0.6231, Val Acc: 80.18%
+Epoch [5/10] Train Loss: 0.6137, Train Acc: 80.68% | Val Loss: 0.6360, Val Acc: 79.02%
+Epoch [6/10] Train Loss: 0.5939, Train Acc: 81.39% | Val Loss: 0.6063, Val Acc: 80.88%
+Epoch [7/10] Train Loss: 0.5928, Train Acc: 81.42% | Val Loss: 0.6054, Val Acc: 80.85%
+Epoch [8/10] Train Loss: 0.5924, Train Acc: 81.44% | Val Loss: 0.6041, Val Acc: 80.89%
+Epoch [9/10] Train Loss: 0.5916, Train Acc: 81.46% | Val Loss: 0.6054, Val Acc: 80.86%
+Epoch [10/10] Train Loss: 0.5912, Train Acc: 81.45% | Val Loss: 0.6062, Val Acc: 80.88%
+
+Training completed in 61.20 minutes
+Best validation accuracy: 80.89%
+
+======================================================================
+REGIME 2: PARTIAL UNFREEZE (LAYER4 + FC)
+======================================================================
+Unfroze layer4. Trainable params: 8.43M
+
+======================================================================
+Training Regime: partial_unfreeze
+Mixed Precision (AMP): Enabled
+======================================================================
+Epoch [1/15] Train Loss: 0.4272, Train Acc: 85.14% | Val Loss: 0.3934, Val Acc: 85.86%
+Epoch [2/15] Train Loss: 0.3647, Train Acc: 86.79% | Val Loss: 0.3733, Val Acc: 86.30%
+Epoch [3/15] Train Loss: 0.3419, Train Acc: 87.41% | Val Loss: 0.3643, Val Acc: 86.54%
+Epoch [4/15] Train Loss: 0.3264, Train Acc: 87.91% | Val Loss: 0.3582, Val Acc: 86.80%
+Epoch [5/15] Train Loss: 0.3145, Train Acc: 88.27% | Val Loss: 0.3557, Val Acc: 86.84%
+Epoch [6/15] Train Loss: 0.3046, Train Acc: 88.62% | Val Loss: 0.3536, Val Acc: 86.93%
+Epoch [7/15] Train Loss: 0.2963, Train Acc: 88.88% | Val Loss: 0.3521, Val Acc: 86.94%
+Epoch [8/15] Train Loss: 0.2889, Train Acc: 89.13% | Val Loss: 0.3514, Val Acc: 86.98%
+Epoch [9/15] Train Loss: 0.2828, Train Acc: 89.36% | Val Loss: 0.3501, Val Acc: 86.97%
+Epoch [10/15] Train Loss: 0.2777, Train Acc: 89.54% | Val Loss: 0.3495, Val Acc: 87.01%
+Epoch [11/15] Train Loss: 0.2738, Train Acc: 89.69% | Val Loss: 0.3491, Val Acc: 87.01%
+Epoch [12/15] Train Loss: 0.2706, Train Acc: 89.81% | Val Loss: 0.3492, Val Acc: 87.04%
+Epoch [13/15] Train Loss: 0.2683, Train Acc: 89.90% | Val Loss: 0.3491, Val Acc: 87.04%
+Epoch [14/15] Train Loss: 0.2669, Train Acc: 89.94% | Val Loss: 0.3494, Val Acc: 87.03%
+Epoch [15/15] Train Loss: 0.2662, Train Acc: 90.00% | Val Loss: 0.3490, Val Acc: 87.06%
+
+Training completed in 92.96 minutes
+Best validation accuracy: 87.06%
+
+======================================================================
+EVALUATING ON TEST SET
+======================================================================
+Test Accuracy: 87.15%
+Test Precision (macro): 0.7980
+Test Recall (macro): 0.7508
+Test F1-Score (macro): 0.7571
+Saved: training_curves.png
+Saved: confusion_matrix.png
+
+======================================================================
+EFFICIENCY ACCOUNTING
+======================================================================
+
+Regime               Test Acc     Params (M)   Epochs×Samples  Hardware        Time (min)  
+----------------------------------------------------------------------------------------------------
+Linear Probe              87.15%       0.03M 10×628138   cuda                 61.20
+Partial Unfreeze          87.15%       8.43M 15×628138   cuda                 92.96
+
+Total training time: 154.16 minutes
+
+Saved: results_summary.txt
+
+======================================================================
+TRAINING COMPLETE
+======================================================================
+Training completed at:  Sun Oct 5 23:21:59 EDT 2025
+Job completed at: Sun Oct  5 11:21:59 PM EDT 2025

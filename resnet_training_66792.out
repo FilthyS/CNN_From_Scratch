@@ -1,0 +1,16 @@
+Job ID: 66792
+Job Name: resnet_training
+Node: b-31-12
+GPU: 0
+Start Time: Sun Oct  5 08:13:42 PM EDT 2025
+Working Directory: /scratch/cx2275/CNN_From_Scratch
+Starting Singularity container...
+Python version: Python 3.10.18
+PyTorch version: 2.6.0
+CUDA available: True
+GPU count: 1
+GPU name: NVIDIA L4
+==========================
+Starting ResNet-18 fine-tuning on EMNIST...
+Training completed at:  Sun Oct 5 20:14:29 EDT 2025
+Job completed at: Sun Oct  5 08:14:29 PM EDT 2025

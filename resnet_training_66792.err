@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/scratch/cx2275/CNN_From_Scratch/resnet18.py", line 15, in <module>
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+ModuleNotFoundError: No module named 'sklearn'
