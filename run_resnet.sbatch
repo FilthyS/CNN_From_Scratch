@@ -29,6 +29,7 @@ singularity exec --nv --overlay ./overlay-25GB-500K.ext3:rw cuda12.6.2-cudnn9.5.
 
     # Move to project dir
     cd CNN_From_Scratch
+    git pull
 
     # Print environment info
     echo 'Python version:' \$(python --version)
@@ -45,6 +46,10 @@ singularity exec --nv --overlay ./overlay-25GB-500K.ext3:rw cuda12.6.2-cudnn9.5.
     python resnet18.py
 
     echo 'Training completed at: ' \$(date)
+
+    git add .
+    git commit -m "added slurm running result"
+    git push
 "
 
 echo "Job completed at: $(date)"
