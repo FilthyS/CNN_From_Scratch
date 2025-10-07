@@ -1,0 +1,32 @@
+TASK 2: ResNet-18 EMNIST Fine-Tuning - Regime Comparison
+================================================================================
+
+Regime                    Test Acc     Params (M)   Epochs     Time (min)  
+--------------------------------------------------------------------------------
+Regime 1: Linear Probe         81.30%       0.03M       15      90.69
+Regime 2: Partial Unfreeze      88.14%      88.14%      11.21M       12     108.44
+
+================================================================================
+
+DETAILED COMPARISON:
+
+Regime 1: Regime 1: Linear Probe
+  Test Accuracy: 81.30%
+  Precision: 0.7110
+  Recall: 0.6568
+  F1-Score: 0.6656
+  Trainable Params: 0.03M
+  Training Time: 90.69 min
+
+Regime 2: Regime 2: Partial Unfreeze
+  Test Accuracy: 88.14%
+  Precision: 0.8246
+  Recall: 0.7647
+  F1-Score: 0.7706
+  Trainable Params: 11.21M
+  Training Time: 108.44 min
+
+TRADE-OFF ANALYSIS:
+  Accuracy improvement (Regime 2 - Regime 1): +6.85%
+  Additional training time: +17.74 minutes
+  Additional trainable params: +11.18M
