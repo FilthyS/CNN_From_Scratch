@@ -302,9 +302,7 @@ def train_regime(model, train_loader, val_loader, criterion, optimizer, schedule
         print(f"Learning Rate Warmup: {warmup_epochs} epochs")
     print(f"{'='*70}")
 
-    # Create output directory for this regime with timestamp
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_dir = f"{output_dir}_{timestamp}"
+    # Create output directory for this regime
     os.makedirs(output_dir, exist_ok=True)
 
     history = {
