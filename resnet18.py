@@ -315,7 +315,7 @@ def train_regime(model, train_loader, val_loader, criterion, optimizer, schedule
     # Initialize early stopping if enabled
     early_stopper = None
     if early_stopping_patience:
-        early_stopper = EarlyStopping(patience=early_stopping_patience, min_delta=0.001, mode='max')
+        early_stopper = EarlyStopping(patience=early_stopping_patience, min_delta=0.005, mode='max')
 
     # Initialize warmup scheduler if enabled
     warmup_scheduler = None
@@ -696,7 +696,7 @@ def main():
     unfreeze_last_block(model2)  # Unfreeze layer4 + FC
 
     criterion = nn.CrossEntropyLoss()
-    optimizer2 = optim.SGD(model2.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4)
+    optimizer2 = optim.SGD(model2.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4)
     scheduler2 = optim.lr_scheduler.CosineAnnealingLR(optimizer2, T_max=20)
 
     trainable_params_regime2 = count_trainable_params_millions(model2)
