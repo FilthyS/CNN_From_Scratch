@@ -155,3 +155,22 @@ Training completed in 91.57 minutes
 Epochs trained: 15/15
 Best validation accuracy: 81.26%
 ResNet Training completed at:  Mon Oct 6 16:14:33 EDT 2025
+[main 406c884] added
+ Committer: Sheldon Xie <cx2275@cs001.hpc.nyu.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 3 files changed, 175 insertions(+)
+ create mode 100644 training_66988.err
+ create mode 100644 training_66988.out
+ create mode 100644 training_curves_20251006_144240.png
+Job completed at: Mon Oct  6 04:14:33 PM EDT 2025
