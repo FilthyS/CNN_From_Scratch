@@ -1,8 +1,8 @@
-Job ID: 67467
+Job ID: 67715
 Job Name: resnet_training
-Node: b-31-7
+Node: b-31-111
 GPU: 0
-Start Time: Tue Oct  7 12:38:36 PM EDT 2025
+Start Time: Tue Oct  7 09:38:48 PM EDT 2025
 Working Directory: /scratch/cx2275/CNN_From_Scratch
 Starting Singularity container...
 Python version: Python 3.10.18
@@ -11,6 +11,86 @@ CUDA available: True
 GPU count: 1
 GPU name: NVIDIA L4
 ==========================
+Running tests...
+Device: cuda
+Training set: torch.Size([48000, 1, 28, 28]), torch.Size([48000])
+Validation set: torch.Size([12000, 1, 28, 28]), torch.Size([12000])
+Test set: torch.Size([10000, 1, 28, 28]), torch.Size([10000])
+Device: cuda
+
+[Linear] forward/backward numeric grad...
+  max |dL/dx (num - analytic)|: 6.458163261413574e-05
+  max |dL/dW (num - analytic)|: 5.84721565246582e-05
+  max |dL/db (num - analytic)|: 0.00011307001113891602
+  PASS
+
+[ReLU] forward/backward numeric grad...
+  max |dL/dx| diff: 0.00018703937530517578
+  PASS
+
+[CrossEntropy] forward/backward numeric grad wrt logits...
+  max |dL/dlogits| diff: 0.00014224275946617126
+  PASS
+
+[Conv2D] forward shape check...
+  PASS
+
+[Conv2D] backward numeric grads (sampled)...
+  max |dL/dx| diff: 0.0005117803812026978
+  max |dL/dW| diff: 0.0006861686706542969
+  PASS
+
+[MaxPool2D] forward vs F.max_pool2d...
+  max |y - y_ref|: 0.0
+  PASS
+
+[MaxPool2D] backward numeric grads...
+  max |dL/dx| diff: 4.225969314575195e-05
+  PASS
+
+[E2E] small CNN forward shape...
+  PASS
+
+[E2E] tiny training sanity: loss should drop...
+  epoch1: loss=2.2131, acc=0.039
+  epoch2: loss=1.9477, acc=0.266
+  PASS
+
+ALL TESTS PASSED (within numeric tolerances)
+==========================
+Tests completed. Starting CNN training...
+Device: cuda
+Training set: torch.Size([48000, 1, 28, 28]), torch.Size([48000])
+Validation set: torch.Size([12000, 1, 28, 28]), torch.Size([12000])
+Test set: torch.Size([10000, 1, 28, 28]), torch.Size([10000])
+CNN from Scratch - Assignment
+==================================================
+Building CNN...
+Starting training...
+Total parameters: 9098
+GPU memory allocated: 210.6 MB
+GPU memory reserved: 212.0 MB
+
+=== Starting Epoch 1/5 ===
+Epoch 1/5: train_loss=1.9249 train_acc=0.4271 val_loss=1.3378 val_acc=0.6769
+
+=== Starting Epoch 2/5 ===
+Epoch 2/5: train_loss=0.8459 train_acc=0.7806 val_loss=0.5704 val_acc=0.8421
+
+=== Starting Epoch 3/5 ===
+Epoch 3/5: train_loss=0.4740 train_acc=0.8664 val_loss=0.4213 val_acc=0.8795
+
+=== Starting Epoch 4/5 ===
+Epoch 4/5: train_loss=0.3759 train_acc=0.8911 val_loss=0.3640 val_acc=0.8921
+
+=== Starting Epoch 5/5 ===
+Epoch 5/5: train_loss=0.3278 train_acc=0.9045 val_loss=0.3222 val_acc=0.9076
+
+Training curves saved to training_curves_20251007_214049.png
+
+Final Test Results: loss 0.2916 | acc 0.9173
+CNN Training completed at:  Tue Oct 7 21:40:51 EDT 2025
+\n==========================
 Starting ResNet-18 fine-tuning on EMNIST...
 Device: cuda
 GPU: NVIDIA L4
@@ -20,7 +100,7 @@ Training dataset size: 628138
 Validation dataset size: 69794
 Test dataset size: 116323
 Batch size: 128
-Output directory: ./output_20251007_123938
+Output directory: ./output_20251007_214105
 
 ======================================================================
 REGIME 1: LINEAR PROBE (Freeze backbone, train only FC)
@@ -48,7 +128,7 @@ Epoch [13/15] LR: 0.000100 | Train Loss: 0.5806, Train Acc: 81.76% | Val Loss: 0
 Epoch [14/15] LR: 0.000100 | Train Loss: 0.5805, Train Acc: 81.74% | Val Loss: 0.5935, Val Acc: 81.25%
 Epoch [15/15] LR: 0.000010 | Train Loss: 0.5808, Train Acc: 81.75% | Val Loss: 0.5921, Val Acc: 81.26%
 
-Training completed in 90.69 minutes
+Training completed in 90.46 minutes
 Epochs trained: 15/15
 Best validation accuracy: 81.26%
 
@@ -57,9 +137,9 @@ Regime 1 Test Results:
   Precision: 0.7110
   Recall: 0.6568
   F1-Score: 0.6656
-Saved: ./output_20251007_123938/regime1_linear_probe/training_curves.png
-Saved: ./output_20251007_123938/regime1_linear_probe/confusion_matrix.png
-Saved: ./output_20251007_123938/regime1_linear_probe/results_summary.txt
+Saved: ./output_20251007_214105/regime1_linear_probe/training_curves.png
+Saved: ./output_20251007_214105/regime1_linear_probe/confusion_matrix.png
+Saved: ./output_20251007_214105/regime1_linear_probe/results_summary.txt
 
 ======================================================================
 REGIME 2: PARTIAL UNFREEZE (Unfreeze layer4 + FC from start)
@@ -88,7 +168,7 @@ Epoch [12/20] LR: 0.000578 | Train Loss: 0.2567, Train Acc: 90.09% | Val Loss: 0
 Early stopping triggered at epoch 12
 No improvement for 5 epochs
 
-Training completed in 108.44 minutes
+Training completed in 109.89 minutes
 Epochs trained: 12/20
 Best validation accuracy: 88.13%
 
@@ -97,57 +177,31 @@ Regime 2 Test Results:
   Precision: 0.8246
   Recall: 0.7647
   F1-Score: 0.7706
-Saved: ./output_20251007_123938/regime2_partial_unfreeze/training_curves.png
-Saved: ./output_20251007_123938/regime2_partial_unfreeze/confusion_matrix.png
-Saved: ./output_20251007_123938/regime2_partial_unfreeze/results_summary.txt
+Saved: ./output_20251007_214105/regime2_partial_unfreeze/training_curves.png
+Saved: ./output_20251007_214105/regime2_partial_unfreeze/confusion_matrix.png
+Saved: ./output_20251007_214105/regime2_partial_unfreeze/results_summary.txt
 
 ======================================================================
 GENERATING COMPARISON REPORTS
 ======================================================================
-Saved: ./output_20251007_123938/regime_comparison.png
-Saved: ./output_20251007_123938/regime_comparison_summary.txt
+Saved: ./output_20251007_214105/regime_comparison.png
+Saved: ./output_20251007_214105/regime_comparison_summary.txt
 
 ================================================================================
 FINAL COMPARISON TABLE
 ================================================================================
 Regime                         Test Acc     Params (M)   Epochs     Time (min)  
 --------------------------------------------------------------------------------
-Regime 1: Linear Probe              81.30%       0.03M       15      90.69
-Regime 2: Partial Unfreeze          88.14%      11.21M       12     108.44
+Regime 1: Linear Probe              81.30%       0.03M       15      90.46
+Regime 2: Partial Unfreeze          88.14%      11.21M       12     109.89
 ================================================================================
 
 Accuracy improvement (Regime 2 - Regime 1): +6.85%
-Additional training time: +17.74 min
+Additional training time: +19.43 min
 Additional trainable params: +11.18M
 
 ======================================================================
 TRAINING COMPLETE
-Results saved to: ./output_20251007_123938/
+Results saved to: ./output_20251007_214105/
 ======================================================================
-Training completed at:  Tue Oct 7 16:00:55 EDT 2025
-[main 71244ea] added
- Committer: Sheldon Xie <cx2275@cs001.hpc.nyu.edu>
-Your name and email address were configured automatically based
-on your username and hostname. Please check that they are accurate.
-You can suppress this message by setting them explicitly. Run the
-following command and follow the instructions in your editor to edit
-your configuration file:
-
-    git config --global --edit
-
-After doing this, you may fix the identity used for this commit with:
-
-    git commit --amend --reset-author
-
- 11 files changed, 245 insertions(+)
- create mode 100644 output_20251007_123938/regime1_linear_probe/confusion_matrix.png
- create mode 100644 output_20251007_123938/regime1_linear_probe/results_summary.txt
- create mode 100644 output_20251007_123938/regime1_linear_probe/training_curves.png
- create mode 100644 output_20251007_123938/regime2_partial_unfreeze/confusion_matrix.png
- create mode 100644 output_20251007_123938/regime2_partial_unfreeze/results_summary.txt
- create mode 100644 output_20251007_123938/regime2_partial_unfreeze/training_curves.png
- create mode 100644 output_20251007_123938/regime_comparison.png
- create mode 100644 output_20251007_123938/regime_comparison_summary.txt
- create mode 100644 resnet_training_67467.err
- create mode 100644 resnet_training_67467.out
-Job completed at: Tue Oct  7 04:00:55 PM EDT 2025
+ResNet Training completed at:  Wed Oct 8 01:03:31 EDT 2025

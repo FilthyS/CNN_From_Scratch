@@ -1,0 +1,18 @@
+TASK 2: ResNet-18 EMNIST Fine-Tuning Results
+Regime: Regime 2: Partial Unfreeze
+======================================================================
+
+Test Metrics:
+  Accuracy: 88.14%
+  Precision (macro): 0.8246
+  Recall (macro): 0.7647
+  F1-Score (macro): 0.7706
+
+Efficiency Accounting:
+  Trainable Parameters: 11.21M
+  Max Epochs: 20
+  Epochs Trained: 12 (early stopped)
+  Samples per Epoch: 628138
+  Total Update Budget: 7537656
+  Training Time: 109.89 minutes
+  Device: cuda
