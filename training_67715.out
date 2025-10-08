@@ -205,3 +205,30 @@ TRAINING COMPLETE
 Results saved to: ./output_20251007_214105/
 ======================================================================
 ResNet Training completed at:  Wed Oct 8 01:03:31 EDT 2025
+[main 1c17ec1] added
+ Committer: Sheldon Xie <cx2275@cs001.hpc.nyu.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 12 files changed, 322 insertions(+)
+ create mode 100644 output_20251007_214105/regime1_linear_probe/confusion_matrix.png
+ create mode 100644 output_20251007_214105/regime1_linear_probe/results_summary.txt
+ create mode 100644 output_20251007_214105/regime1_linear_probe/training_curves.png
+ create mode 100644 output_20251007_214105/regime2_partial_unfreeze/confusion_matrix.png
+ create mode 100644 output_20251007_214105/regime2_partial_unfreeze/results_summary.txt
+ create mode 100644 output_20251007_214105/regime2_partial_unfreeze/training_curves.png
+ create mode 100644 output_20251007_214105/regime_comparison.png
+ create mode 100644 output_20251007_214105/regime_comparison_summary.txt
+ create mode 100644 training_67715.err
+ create mode 100644 training_67715.out
+ create mode 100644 training_curves_20251007_214049.png
+Job completed at: Wed Oct  8 01:03:32 AM EDT 2025
